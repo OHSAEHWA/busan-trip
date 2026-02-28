@@ -329,7 +329,7 @@ window.itinView=function(v){
   document.getElementById('mw').classList.toggle('v',v==='map');
   document.getElementById('iv1').classList.toggle('on',v==='map');
   document.getElementById('iv2').classList.toggle('on',v==='list');
-  if(v==='map')updateItinMap();
+  if(v==='map'){setTimeout(function(){if(gmap){google.maps.event.trigger(gmap,'resize');updateItinMap();}},150);}
 };
 
 // ===== DAY BUTTONS =====
@@ -454,9 +454,19 @@ window.addRecToDay=function(placeId){
 
 // ===== MAP =====
 window.initMap=function(){
+  // Temporarily show map div for proper initialization
+  var mw=document.getElementById('mw');
+  var wasHidden=!mw.classList.contains('v');
+  if(wasHidden)mw.style.cssText='display:flex!important;flex-direction:column;position:absolute;left:-9999px;width:100%;height:300px';
+  
   gmap=new google.maps.Map(document.getElementById('map'),{center:{lat:35.155,lng:129.13},zoom:13,disableDefaultUI:true,zoomControl:true,styles:[{elementType:'geometry',stylers:[{color:'#0a1628'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0a1628'}]},{elementType:'labels.text.fill',stylers:[{color:'#6b8299'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#0f2540'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#1a2d4a'}]}]});
   gIW=new google.maps.InfoWindow();
-  updateItinMap();
+  
+  if(wasHidden){setTimeout(function(){mw.style.cssText='';},100);}
+  
+  google.maps.event.addListenerOnce(gmap,'idle',function(){
+    updateItinMap();
+  });
   loadAll();
 };
 
@@ -792,7 +802,7 @@ window.addEventListener('DOMContentLoaded',function(){loadAll();});
 <script>
 function loadGMaps(){
   var s=document.createElement('script');
-  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyC5M014PkaOMBGHrWVQP6Q_wb6zOb7I0qs&libraries=places&callback=onGMapsLoaded';
+  s.src='https://maps.googleapis.com/maps/api/js?key=AIzaSyD5Zq_g4MZmeTHi0hPIbQ5fp8-4P_nVVAY&libraries=places&callback=onGMapsLoaded';
   s.async=true;s.defer=true;document.head.appendChild(s);
 }
 window.onGMapsLoaded=function(){initMap();initAutocomplete();};
